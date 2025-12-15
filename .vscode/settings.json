@@ -1,4 +1,0 @@
-{
-    "appService.defaultWebAppToDeploy": "/subscriptions/ec06dacf-d898-4a16-9e13-2f11d48a0060/resourceGroups/aiflask/providers/Microsoft.Web/sites/orange-grass-38e945e0bb6d4dcf95070c22c0e62992",
-    "appService.deploySubpath": "."
-}
