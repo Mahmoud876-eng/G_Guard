@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwarmSense - AI Assistant</title>
+    <style>
+        /* Base styles */
+        :root {
+            --primary: #2a6e3f;
+            --primary-light: #4caf50;
+            --primary-dark: #1b5e20;
+            --secondary: #1a365d;
+            --accent: #ff9800;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --gray-light: #e9ecef;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --info: #17a2b8;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header */
+        header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 100%;
+            z-index: 1000;
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo h2 {
+            margin-bottom: 0;
+            color: var(--primary);
+        }
+        
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav ul li {
+            margin-left: 30px;
+        }
+        
+        nav ul li a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        nav ul li a:hover {
+            color: var(--primary);
+        }
+        
+        /* Chat Container */
+        .chat-container {
+            display: flex;
+            flex-grow: 1;
+            padding: 100px 0 40px;
+            height: calc(100vh - 140px);
+        }
+        
+        .chat-sidebar {
+            width: 300px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-right: 20px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--gray-light);
+        }
+        
+        .bot-avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            margin-right: 15px;
+        }
+        
+        .bot-info h3 {
+            margin-bottom: 5px;
+            color: var(--secondary);
+        }
+        
+        .bot-info p {
+            font-size: 14px;
+            color: var(--gray);
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--success);
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .quick-actions {
+            margin-bottom: 20px;
+        }
+        
+        .quick-actions h4 {
+            margin-bottom: 10px;
+            color: var(--secondary);
+            font-size: 16px;
+        }
+        
+        .quick-action-btn {
+            display: block;
+            width: 100%;
+            padding: 10px 15px;
+            background-color: var(--light);
+            border: 1px solid var(--gray-light);
+            border-radius: 5px;
+            text-align: left;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .quick-action-btn:hover {
+            background-color: var(--primary-light);
+            color: white;
+            border-color: var(--primary-light);
+        }
+        
+        .recent-chats {
+            flex-grow: 1;
+        }
+        
+        .recent-chats h4 {
+            margin-bottom: 10px;
+            color: var(--secondary);
+            font-size: 16px;
+        }
+        
+        .recent-chat-item {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 14px;
+        }
+        
+        .recent-chat-item:hover {
+            background-color: var(--light);
+        }
+        
+        .recent-chat-item.active {
+            background-color: rgba(42, 110, 63, 0.1);
+            color: var(--primary);
+            font-weight: 500;
+        }
+        
+        /* Chat Main Area */
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--gray-light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .chat-title h2 {
+            color: var(--secondary);
+            margin-bottom: 5px;
+        }
+        
+        .chat-title p {
+            color: var(--gray);
+            font-size: 14px;
+        }
+        
+        .chat-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chat-action-btn {
+            background: none;
+            border: none;
+            color: var(--gray);
+            cursor: pointer;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+        
+        .chat-action-btn:hover {
+            color: var(--primary);
+        }
+        
+        .messages-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .message {
+            max-width: 70%;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 15px;
+            position: relative;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .bot-message {
+            align-self: flex-start;
+            background-color: var(--light);
+            border-bottom-left-radius: 5px;
+        }
+        
+        .user-message {
+            align-self: flex-end;
+            background-color: var(--primary);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .message-time {
+            font-size: 12px;
+            margin-top: 5px;
+            opacity: 0.7;
+        }
+        
+        .typing-indicator {
+            display: none;
+            align-self: flex-start;
+            background-color: var(--light);
+            padding: 15px;
+            border-radius: 15px;
+            border-bottom-left-radius: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .typing-dots {
+            display: flex;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--gray);
+            margin-right: 5px;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        
+        .input-container {
+            padding: 20px;
+            border-top: 1px solid var(--gray-light);
+            display: flex;
+            align-items: center;
+        }
+        
+        .message-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid var(--gray-light);
+            border-radius: 25px;
+            outline: none;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .message-input:focus {
+            border-color: var(--primary);
+        }
+        
+        .send-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            margin-left: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+        }
+        
+        .send-btn:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .input-actions {
+            display: flex;
+            gap: 10px;
+            margin-left: 10px;
+        }
+        
+        .input-action-btn {
+            background: none;
+            border: none;
+            color: var(--gray);
+            cursor: pointer;
+            font-size: 18px;
+            transition: color 0.3s;
+        }
+        
+        .input-action-btn:hover {
+            color: var(--primary);
+        }
+        
+        /* Suggestions */
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .suggestion-chip {
+            background-color: var(--light);
+            border: 1px solid var(--gray-light);
+            border-radius: 20px;
+            padding: 8px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .suggestion-chip:hover {
+            background-color: var(--primary-light);
+            color: white;
+            border-color: var(--primary-light);
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--secondary);
+            color: white;
+            padding: 30px 0 20px;
+            margin-top: auto;
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        
+        .footer-column {
+            flex: 0 0 23%;
+            margin-bottom: 20px;
+        }
+        
+        .footer-column h3 {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .footer-column ul {
+            list-style: none;
+        }
+        
+        .footer-column ul li {
+            margin-bottom: 8px;
+        }
+        
+        .footer-column ul li a {
+            color: #a0aec0;
+            text-decoration: none;
+            transition: color 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .footer-column ul li a:hover {
+            color: white;
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: #a0aec0;
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .chat-container {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .chat-sidebar {
+                width: 100%;
+                margin-right: 0;
+                margin-bottom: 20px;
+            }
+            
+            nav ul {
+                display: none;
+            }
+            
+            .footer-column {
+                flex: 0 0 48%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .message {
+                max-width: 85%;
+            }
+            
+            .footer-column {
+                flex: 0 0 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% include '_navbar.html' %}
+
+    <!-- Chat Container -->
+    <div class="container chat-container" style="padding-top:40px;">
+       
+        
+        <!-- Main Chat Area -->
+        <div class="chat-main">
+            <div class="chat-header">
+                <div class="chat-title">
+                    <h2>SwarmSense AI Assistant</h2>
+                    <p>Ask me about environmental data, sensor status, or system help</p>
+                </div>
+                <div class="chat-actions">
+                    <button class="chat-action-btn" title="Clear conversation">🗑️</button>
+                    <button class="chat-action-btn" title="Settings">⚙️</button>
+                </div>
+            </div>
+            
+            <div class="chat-container" style="display:flex;flex-direction:column;height:calc(100% - 52px);">
+                <div class="chat-messages" style="flex:1;overflow-y:auto;padding:12px;background:#f7fafc;display:flex;flex-direction:column;">
+                    {# If only the system prompt exists or list empty, show a custom welcome instead #}
+                    {% if not response or (response|length == 1 and response[0].role == 'system') %}
+                        <div class="message system">Welcome to SwarmSense AI Assistant. How can I help you today?</div>
+                    {% else %}
+                        {% for message in response %}
+                            {# Skip the very first system prompt so user doesn't see the raw instruction #}
+                            {% if not (loop.first and message.role == 'system') %}
+                                <div class="message {{ 'system' if message.role == 'system' else 'user' }}">
+                                    {{ message.content }}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <form class="chat-input" action="/chatbot" method="post" style="display:flex;gap:8px;padding:12px;border-top:1px solid #e2e8f0;background:#fff;">
+                    <input type="text" name="user_input" placeholder="Type your message here" required style="flex:1;padding:12px;border-radius:12px;border:1px solid #cbd5e1;">
+                    <button type="submit" style="padding:10px 16px;border-radius:12px;border:none;background:#1a3e72;color:#fff;cursor:pointer;">Send</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>SwarmSense</h3>
+                    <p>Collective intelligence for environmental protection, inspired by nature's most efficient systems.</p>
+                </div>
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="dashboard.html">Dashboard</a></li>
+                        <li><a href="nodes.html">Nodes</a></li>
+                        <li><a href="alerts.html">Alerts</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Resources</h3>
+                    <ul>
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">API Reference</a></li>
+                        <li><a href="#">Case Studies</a></li>
+                        <li><a href="#">Support</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Contact Us</h3>
+                    <ul>
+                        <li><a href="mailto:info@swarmsense.com">info@swarmsense.com</a></li>
+                        <li><a href="tel:+1234567890">+1 (234) 567-890</a></li>
+                        <li>123 Innovation Drive<br>Tech City, TC 12345</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 SwarmSense. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <style>
+        .message.system {
+            background: #eef2ff;
+            color: #3730a3;
+            align-self: flex-start;
+            padding: 12px 16px;
+            border-radius: 16px;
+            margin-bottom: 8px;
+            max-width: 75%;
+        }
+        .message.user {
+            background: #d9fbe7;
+            color: #166534;
+            align-self: flex-end;
+            padding: 12px 16px;
+            border-radius: 16px;
+            margin-bottom: 8px;
+            max-width: 75%;
+        }
+    </style>
+</body>
+</html>

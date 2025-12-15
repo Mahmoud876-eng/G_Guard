@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwarmSense - Collective Intelligence for Environmental Protection</title>
+    <style>
+        /* Base styles */
+        :root {
+            --primary: #2a6e3f;
+            --primary-light: #4caf50;
+            --secondary: #1a365d;
+            --accent: #ff9800;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        section {
+            padding: 80px 0;
+        }
+        
+        h1, h2, h3 {
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            font-weight: 700;
+        }
+        
+        h2 {
+            font-size: 2.5rem;
+            color: var(--secondary);
+        }
+        
+        h3 {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+        
+        p {
+            margin-bottom: 1.5rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            background-color: var(--primary-light);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .btn-secondary {
+            background-color: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn-secondary:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        /* Header */
+        header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 100%;
+            z-index: 1000;
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo h2 {
+            margin-bottom: 0;
+            color: var(--primary);
+        }
+        
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav ul li {
+            margin-left: 30px;
+        }
+        
+        nav ul li a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        nav ul li a:hover {
+            color: var(--primary);
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            padding-top: 150px;
+            padding-bottom: 100px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .hero-text {
+            flex: 1;
+            padding-right: 50px;
+        }
+        
+        .hero-text h1 {
+            color: var(--secondary);
+        }
+        
+        .hero-text p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+        
+        .hero-visual {
+            flex: 1;
+            position: relative;
+            height: 400px;
+        }
+        
+        /* Swarm Animation */
+        .swarm-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .node {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(42, 110, 63, 0.5);
+            transition: all 0.5s ease;
+        }
+        
+        .connection {
+            position: absolute;
+            height: 2px;
+            background-color: rgba(42, 110, 63, 0.3);
+            transform-origin: 0 0;
+        }
+        
+        /* How It Works */
+        .how-it-works {
+            background-color: white;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        .section-header p {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .steps {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        
+        .step {
+            flex: 0 0 30%;
+            text-align: center;
+            padding: 30px;
+            border-radius: 10px;
+            transition: transform 0.3s;
+            margin-bottom: 20px;
+        }
+        
+        .step:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+        
+        .step-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background-color: #e8f5e9;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: var(--primary);
+        }
+        
+        /* Features */
+        .features {
+            background-color: #f8f9fa;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .feature-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+        
+        /* Applications */
+        .applications {
+            background-color: white;
+        }
+        
+        .app-cards {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        
+        .app-card {
+            flex: 0 0 48%;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .app-icon {
+            flex: 0 0 60px;
+            height: 60px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            margin-right: 20px;
+        }
+        
+        /* CTA */
+        .cta {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            text-align: center;
+        }
+        
+        .cta h2 {
+            color: white;
+        }
+        
+        .cta .btn {
+            background-color: white;
+            color: var(--primary);
+        }
+        
+        .cta .btn:hover {
+            background-color: #f0f0f0;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--secondary);
+            color: white;
+            padding: 60px 0 30px;
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+        
+        .footer-column {
+            flex: 0 0 23%;
+            margin-bottom: 30px;
+        }
+        
+        .footer-column h3 {
+            color: white;
+            margin-bottom: 20px;
+        }
+        
+        .footer-column ul {
+            list-style: none;
+        }
+        
+        .footer-column ul li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-column ul li a {
+            color: #a0aec0;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-column ul li a:hover {
+            color: white;
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: #a0aec0;
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .hero-content {
+                flex-direction: column;
+            }
+            
+            .hero-text {
+                padding-right: 0;
+                margin-bottom: 50px;
+                text-align: center;
+            }
+            
+            .steps {
+                flex-direction: column;
+            }
+            
+            .step {
+                flex: 0 0 100%;
+            }
+            
+            .app-card {
+                flex: 0 0 100%;
+            }
+            
+            .footer-column {
+                flex: 0 0 48%;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            h2 {
+                font-size: 2rem;
+            }
+            
+            nav ul {
+                display: none;
+            }
+            
+            .footer-column {
+                flex: 0 0 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-container">
+            <div class="logo">
+                <div class="logo-icon">S</div>
+                <h2>SwarmSense</h2>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#how-it-works">How It Works</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#applications">Applications</a></li>
+                    <li><a href="/login">Login</a></li>
+                    <li><a href="/register" class="btn btn-secondary">Register</a></li>
+                    <li><a href="#contact" class="btn btn-secondary">Contact Us</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="container hero-content">
+            <div class="hero-text">
+                <h1>Collective Intelligence for Environmental Protection</h1>
+                <p>Matrix uses multiple Raspberry Pi Pico "micro-agents" working together as a coordinated swarm network to detect environmental hazards with unprecedented accuracy.</p>
+                <div style="display:flex; gap:16px; flex-wrap:wrap; margin-top:10px;">
+                    <a href="#how-it-works" class="btn">Learn More</a>
+                    <a href="/login" class="btn btn-secondary">Login</a>
+                    <a href="/register" class="btn">Register</a>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="swarm-container" id="swarm">
+                    <!-- Swarm nodes and connections will be generated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="container">
+            <div class="section-header">
+                <h2>How SwarmSense Works</h2>
+                <p>Inspired by nature's most efficient systems, our distributed network of sensors collaborates to identify and verify environmental threats.</p>
+            </div>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-icon">1</div>
+                    <h3>Deploy Micro-Agents</h3>
+                    <p>Distribute low-cost Raspberry Pi Pico nodes equipped with environmental sensors across your facility or area of interest.</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">2</div>
+                    <h3>Collective Monitoring</h3>
+                    <p>Each node continuously monitors for pollutants, toxic gases, temperature anomalies, and other environmental hazards.</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">3</div>
+                    <h3>Distributed Intelligence</h3>
+                    <p>Nodes share data wirelessly and use lightweight AI models to collaboratively identify and verify potential threats.</p>
+                </div>
+                <div class="step">
+                    <div class="step-icon">4</div>
+                    <h3>Early Warning System</h3>
+                    <p>Once a hazard is verified by the swarm, immediate alerts are sent to enable proactive response before damage occurs.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-header">
+                <h2>Key Features</h2>
+                <p>SwarmSense combines cutting-edge technology with nature-inspired design principles.</p>
+            </div>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🌐</div>
+                    <h3>Distributed Network</h3>
+                    <p>Multiple nodes work together as a swarm, eliminating single points of failure and increasing system resilience.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <h3>Lightweight AI</h3>
+                    <p>Each micro-agent runs an efficient AI model optimized for edge computing on Raspberry Pi Pico hardware.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Collective Decision Making</h3>
+                    <p>Nodes vote on risk levels and collaborate to confirm threats, reducing false alarms and increasing accuracy.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💰</div>
+                    <h3>Cost-Effective Solution</h3>
+                    <p>Replace expensive single monitoring stations with a network of affordable, intelligent sensors.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔍</div>
+                    <h3>Comprehensive Monitoring</h3>
+                    <p>Detect air pollutants, toxic gases, temperature anomalies, noise pollution, and chemical leaks.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Real-Time Alerts</h3>
+                    <p>Immediate notification system ensures rapid response to verified environmental hazards.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Applications -->
+    <section class="applications" id="applications">
+        <div class="container">
+            <div class="section-header">
+                <h2>Applications</h2>
+                <p>SwarmSense is designed for various industrial and environmental monitoring scenarios.</p>
+            </div>
+            <div class="app-cards">
+                <div class="app-card">
+                    <div class="app-icon">🏭</div>
+                    <div>
+                        <h3>Industrial Facilities</h3>
+                        <p>Monitor factories and industrial plants for chemical leaks, air quality issues, and temperature anomalies.</p>
+                    </div>
+                </div>
+                <div class="app-card">
+                    <div class="app-icon">🌳</div>
+                    <div>
+                        <h3>Environmental Protection</h3>
+                        <p>Deploy in natural areas to detect pollution sources and monitor ecosystem health.</p>
+                    </div>
+                </div>
+                <div class="app-card">
+                    <div class="app-icon">🏙️</div>
+                    <div>
+                        <h3>Urban Areas</h3>
+                        <p>Monitor air quality and noise pollution across cities and residential areas.</p>
+                    </div>
+                </div>
+                <div class="app-card">
+                    <div class="app-icon">🛢️</div>
+                    <div>
+                        <h3>Chemical Storage</h3>
+                        <p>Secure storage facilities with early detection of leaks and hazardous conditions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta">
+        <div class="container">
+            <div class="section-header">
+                <h2>Ready to Protect Your Environment?</h2>
+                <p>Join the SwarmSense revolution and deploy intelligent, collaborative environmental monitoring.</p>
+                <a href="#contact" class="btn">Get Started Today</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>SwarmSense</h3>
+                    <p>Collective intelligence for environmental protection, inspired by nature's most efficient systems.</p>
+                </div>
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#how-it-works">How It Works</a></li>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#applications">Applications</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Resources</h3>
+                    <ul>
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">Case Studies</a></li>
+                        <li><a href="#">Research Papers</a></li>
+                        <li><a href="#">Blog</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Contact Us</h3>
+                    <ul>
+                        <li><a href="mailto:info@swarmsense.com">info@swarmsense.com</a></li>
+                        <li><a href="tel:+1234567890">+1 (234) 567-890</a></li>
+                        <li>123 Innovation Drive<br>Tech City, TC 12345</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 SwarmSense. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Swarm animation
+        document.addEventListener('DOMContentLoaded', function() {
+            const swarmContainer = document.getElementById('swarm');
+            const nodeCount = 15;
+            const nodes = [];
+            const connections = [];
+            
+            // Create nodes
+            for (let i = 0; i < nodeCount; i++) {
+                const node = document.createElement('div');
+                node.className = 'node';
+                
+                // Random position within container
+                const x = Math.random() * 90 + 5; // 5% to 95%
+                const y = Math.random() * 90 + 5;
+                
+                node.style.left = `${x}%`;
+                node.style.top = `${y}%`;
+                
+                swarmContainer.appendChild(node);
+                nodes.push({ element: node, x, y, targetX: x, targetY: y });
+            }
+            
+            // Create connections between nearby nodes
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const dx = nodes[i].x - nodes[j].x;
+                    const dy = nodes[i].y - nodes[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    // Only connect nodes that are relatively close
+                    if (distance < 40) {
+                        const connection = document.createElement('div');
+                        connection.className = 'connection';
+                        
+                        // Position and rotate the connection line
+                        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                        connection.style.width = `${distance}%`;
+                        connection.style.left = `${nodes[i].x}%`;
+                        connection.style.top = `${nodes[i].y}%`;
+                        connection.style.transform = `rotate(${angle}deg)`;
+                        
+                        swarmContainer.appendChild(connection);
+                        connections.push(connection);
+                    }
+                }
+            }
+            
+            // Animate nodes
+            function animateNodes() {
+                nodes.forEach(node => {
+                    // Occasionally set new target position
+                    if (Math.random() < 0.02) {
+                        node.targetX = Math.random() * 90 + 5;
+                        node.targetY = Math.random() * 90 + 5;
+                    }
+                    
+                    // Move toward target
+                    node.x += (node.targetX - node.x) * 0.05;
+                    node.y += (node.targetY - node.y) * 0.05;
+                    
+                    node.element.style.left = `${node.x}%`;
+                    node.element.style.top = `${node.y}%`;
+                });
+                
+                // Update connections
+                let connectionIndex = 0;
+                for (let i = 0; i < nodes.length; i++) {
+                    for (let j = i + 1; j < nodes.length; j++) {
+                        const dx = nodes[i].x - nodes[j].x;
+                        const dy = nodes[i].y - nodes[j].y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < 40 && connectionIndex < connections.length) {
+                            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                            connections[connectionIndex].style.width = `${distance}%`;
+                            connections[connectionIndex].style.left = `${nodes[i].x}%`;
+                            connections[connectionIndex].style.top = `${nodes[i].y}%`;
+                            connections[connectionIndex].style.transform = `rotate(${angle}deg)`;
+                            connections[connectionIndex].style.display = 'block';
+                            connectionIndex++;
+                        }
+                    }
+                }
+                
+                // Hide remaining connections
+                for (let i = connectionIndex; i < connections.length; i++) {
+                    connections[i].style.display = 'none';
+                }
+                
+                requestAnimationFrame(animateNodes);
+            }
+            
+            animateNodes();
+        });
+    </script>
+</body>
+</html>

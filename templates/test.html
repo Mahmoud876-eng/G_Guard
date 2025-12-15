@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Matrix • Firebase Live Test</title>
+	<style>
+		body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; padding: 24px; background: #f7faf9; color: #0f172a; }
+		.card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 8px 24px rgba(16,24,40,.08); max-width: 900px; margin: 0 auto; }
+		h1 { margin: 0 0 8px; font-size: 20px; }
+		.muted { color: #64748b; font-size: 14px; }
+		.row { display: flex; gap: 16px; align-items: center; margin: 12px 0 8px; }
+		.badge { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 12px; background: #eef2ff; color: #3730a3; }
+		pre { background: #0b1220; color: #e2e8f0; padding: 16px; border-radius: 10px; overflow: auto; max-height: 60vh; }
+		.small { font-size: 12px; color: #64748b; }
+		.path { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: #f1f5f9; padding: 2px 6px; border-radius: 6px; }
+	</style>
+	<!-- No Firebase SDK required; using EventSource (SSE) with REST + polling fallback -->
+</head>
+<body>
+	<div class="card">
+		<h1>Firebase Realtime Updates</h1>
+		<div class="muted">Listening to changes at <span class="path">/data</span></div>
+		<div class="row">
+			<span class="badge" id="status">initializing…</span>
+		</div>
+		<pre id="payload">waiting for data…</pre>
+		<div class="small">Tip: update the database (path <span class="path">/data</span>) to see live changes here.</div>
+	</div>
+
+	<script>
+		const BASE = 'https://synaptix-e0fa0-default-rtdb.europe-west1.firebasedatabase.app';
+		const PATH = 'data'; // change if you want a different node
+		const STREAM_URL = `${BASE}/${PATH}.json`;
+		let usingSDK = false; // flag if later switched to Firebase SDK
+
+		function setStatus(text) {
+			const el = document.getElementById('status');
+			const now = new Date().toLocaleTimeString();
+			el.textContent = `${text} @ ${now}`;
+		}
+
+		function render(obj) {
+			const pre = document.getElementById('payload');
+			pre.textContent = (obj === null || obj === undefined)
+				? 'null'
+				: JSON.stringify(obj, null, 2);
+		}
+
+		function startPolling() {
+			setStatus('polling');
+			let lastJSON = null;
+			async function tick() {
+				try {
+					const res = await fetch(STREAM_URL, { cache: 'no-store' });
+					const data = await res.json();
+					const curr = JSON.stringify(data);
+					if (curr !== lastJSON) {
+						render(data);
+						lastJSON = curr;
+					}
+				} catch (e) {
+					setStatus('polling error: ' + (e?.message || e));
+				} finally {
+					setTimeout(tick, 2000);
+				}
+			}
+			tick();
+		}
+
+		async function initialLoad() {
+			try {
+				setStatus('initial fetch');
+				const res = await fetch(STREAM_URL + '?print=pretty&cacheBust=' + Date.now());
+				const data = await res.json();
+				render(data);
+			} catch (e) {
+				setStatus('initial fetch failed: ' + (e?.message || e));
+			}
+		}
+
+		function extractFirebasePayload(raw) {
+			// Firebase streaming REST format: {"path":"/","data":{...}}
+			if (raw && typeof raw === 'object' && 'data' in raw && (raw.path === '/' || raw.path)) {
+				return raw.data;
+			}
+			return raw; // fallback if already the data
+		}
+
+		function startSSE() {
+			try {
+				const es = new EventSource(STREAM_URL);
+				let opened = false;
+				es.onopen = () => { opened = true; setStatus('connected (SSE)'); };
+				es.onmessage = (evt) => {
+					if (!evt.data || evt.data === 'null') return;
+					try {
+						const wrapper = JSON.parse(evt.data);
+						const payload = extractFirebasePayload(wrapper);
+						render(payload);
+					} catch (e) {
+						console.debug('Non-JSON frame', evt.data);
+					}
+				};
+				es.onerror = () => {
+					setStatus(opened ? 'SSE dropped; fallback to polling' : 'SSE failed; using polling');
+					try { es.close(); } catch {}
+					startPolling();
+				};
+			} catch (e) {
+				setStatus('SSE init error; using polling');
+				startPolling();
+			}
+		}
+
+		// Start: load once then attach realtime
+		initialLoad().then(startSSE);
+	</script>
+</body>
+</html>

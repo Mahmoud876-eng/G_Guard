@@ -1,0 +1,29 @@
+{% set current = request.path %}
+<style>
+  .site-navbar-wrapper { position:fixed; top:0; left:0; right:0; z-index:1000; background:#ffffff; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
+  .site-navbar { max-width:1200px; margin:0 auto; padding:12px 28px; display:flex; align-items:center; justify-content:space-between; font-family:'Segoe UI',Tahoma,Verdana,sans-serif; }
+  .site-navbar .brand { display:flex; align-items:center; gap:10px; font-weight:600; font-size:20px; color:#1a365d; text-decoration:none; }
+  .site-navbar .logo-icon { width:40px; height:40px; background:#2a6e3f; color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; letter-spacing:0.5px; }
+  .nav-links { list-style:none; display:flex; gap:32px; margin:0; padding:0; }
+  .nav-links a { position:relative; text-decoration:none; color:#212529; font-weight:500; padding:6px 4px; transition:color .25s; }
+  .nav-links a:hover { color:#2a6e3f; }
+  .nav-links a.active { color:#2a6e3f; }
+  .nav-links a.active::after { content:''; position:absolute; left:0; right:0; bottom:-6px; height:3px; background:#2a6e3f; border-radius:2px; }
+  body { padding-top:68px; }
+  @media (max-width:768px){ .nav-links{ gap:18px; } body{ padding-top:72px; } }
+</style>
+<div class="site-navbar-wrapper">
+  <div class="site-navbar">
+    <a href="{{ url_for('index') }}" class="brand">
+      <div class="logo-icon">S</div>
+      <span>SwarmSense</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="{{ url_for('index') }}" class="{{ 'active' if current == '/' else '' }}">Home</a></li>
+      <li><a href="{{ url_for('bots') }}" class="{{ 'active' if current.startswith('/bots') else '' }}">Bots</a></li>
+      <li><a href="{{ url_for('chatbot') }}" class="{{ 'active' if current.startswith('/chatbot') else '' }}">Chatbot</a></li>
+      <li><a href="{{ url_for('dashboard') }}" class="{{ 'active' if current.startswith('/dashboard') else '' }}">Dashboard</a></li>
+      <li><a href="{{ url_for('factuary') }}" class="{{ 'active' if current.startswith('/factuary') else '' }}">Factuary</a></li>
+    </ul>
+  </div>
+</div>

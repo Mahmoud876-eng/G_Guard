@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SWARM Bot Monitoring</title>
+    <style>
+        /* Base Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, #2c3e50, #1a1a2e);
+            color: white;
+            padding: 1.5rem 0;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2.2rem;
+        }
+
+        .tagline {
+            opacity: 0.8;
+            margin-top: 0.5rem;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            background: white;
+            padding: 1rem;
+            margin: 1rem auto;
+            width: 90%;
+            max-width: 1200px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            text-align: center;
+            padding: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+
+        /* Bot Cards Grid */
+        .bot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            padding: 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .bot-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            position: relative;
+            transition: transform 0.3s;
+            min-height: 180px;
+        }
+
+        .bot-card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Bot Avatar (Top of Card) */
+        .bot-avatar {
+            width: 60px;
+            height: 60px;
+            background: #3498db;
+            border-radius: 50%;
+            margin: -50px auto 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Special Bot Styling */
+        .bot-card.data-seeker .bot-avatar {
+            background: #9b59b6; /* Purple */
+        }
+
+        .bot-card.leader .bot-avatar {
+            background: #e74c3c; /* Red */
+        }
+
+        .bot-card.scout .bot-avatar {
+            background: #2ecc71; /* Green */
+        }
+
+        .bot-card.repair .bot-avatar {
+            background: #f39c12; /* Orange */
+        }
+
+        .bot-card.sentinel .bot-avatar {
+            background: #34495e; /* Dark Blue */
+        }
+
+        /* Status Indicators */
+        .bot-status {
+            display: flex;
+            align-items: center;
+            margin: 0.5rem 0;
+        }
+
+        .status-icon {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-active {
+            background: #2ecc71;
+        }
+
+        .status-destroyed {
+            background: #e74c3c;
+        }
+
+        .status-warning {
+            background: #f39c12;
+        }
+
+        /* Bot Details */
+        .bot-name {
+            font-size: 1.3rem;
+            margin: 0.5rem 0;
+            color: #2c3e50;
+        }
+
+        .bot-type {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            background: #ecf0f1;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .bot-details {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin: 0.5rem 0;
+        }
+
+        /* Destroyed Bot Overlay */
+        .bot-card.destroyed {
+            position: relative;
+            opacity: 0.7;
+        }
+
+        .bot-card.destroyed::after {
+            content: "DESTROYED";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(231, 76, 60, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #e74c3c;
+            border-radius: 10px;
+        }
+
+        /* Scrollbar Styling */
+        .bot-grid::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .bot-grid::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .bot-grid::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+
+        .bot-grid::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    {% include '_navbar.html' %}
+    <header style="padding-top:40px; text-align:center;">
+        <h1>SwarmSense Bot Monitoring</h1>
+        <p class="tagline">Real-time status of 24 autonomous units</p>
+    </header>
+
+    <!-- Stats Overview -->
+    <div class="stats-bar">
+        <div class="stat">
+            <div class="stat-value">24</div>
+            <div class="stat-label">Total Bots</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value">18</div>
+            <div class="stat-label">Active</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value">3</div>
+            <div class="stat-label">Destroyed</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value">6</div>
+            <div class="stat-label">Special Units</div>
+        </div>
+    </div>
+
+    <!-- Bot Cards Grid -->
+    <div class="bot-grid">
+        <!-- Standard Bots -->
+        <div class="bot-card">
+            <div class="bot-avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <h3 class="bot-name">Unit #001</h3>
+            <span class="bot-type">Standard Patrol</span>
+            <div class="bot-status">
+                <div class="status-icon status-active"></div>
+                <span>Active</span>
+            </div>
+            <p class="bot-details">
+                Last ping: 2 mins ago<br>
+                Location: Sector 7-G
+            </p>
+        </div>
+
+        <div class="bot-card">
+            <div class="bot-avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <h3 class="bot-name">Unit #002</h3>
+            <span class="bot-type">Standard Patrol</span>
+            <div class="bot-status">
+                <div class="status-icon status-active"></div>
+                <span>Active</span>
+            </div>
+            <p class="bot-details">
+                Last ping: 1 min ago<br>
+                Location: Sector 3-A
+            </p>
+        </div>
+
+        <div class="bot-card">
+            <div class="bot-avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <h3 class="bot-name">Unit #003</h3>
+            <span class="bot-type">Standard Patrol</span>
+            <div class="bot-status">
+                <div class="status-icon status-active"></div>
+                <span>Active</span>
+            </div>
+            <p class="bot-details">
+                Last ping: 3 mins ago<br>
+                Location: Sector 5-F
+            </p>
+        </div>
+
+        <div class="bot-card destroyed">
+            <div class="bot-avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <h3 class="bot-name">Unit #004</h3>
+            <span class="bot-type">Standard Patrol</span>
+            <div class="bot-status">
+                <div class="status-icon status-destroyed"></div>
+                <span>Offline</span>
+            </div>
+            <p class="bot-details">
+                Last seen: 6 hours ago<br>
+                Cause: Critical failure
+            </p>
+        </div>
+
+        <!-- Leader Bot -->
+        <div class="bot-card leader">
+            <div class="bot-avatar">
+                <i class="fas fa-crown"></i>
+            </div>
+            <h3 class="bot-name">Unit #005</h3>
+            <span class="bot-type">Swarm Leader</span>
+            <div class="bot-status">
+                <div class="status-icon status-active"></div>
+                <span>Commanding</span>
+            </div>
+            <p class="bot-details">
+                Last ping: 1 min ago<br>
+                Subordinates: 8 units
+            </p>
+        </div>
+
+        <!-- Data Seeker Bots -->
+        <div class="bot-card data-seeker">
+            <div class="bot-avatar">
+                <i class="fas fa-database"></i>
+            </div>
+            <h3 class="bot-name">Unit #006</h3>
+            <span class="bot-type">Data Seeker</span>
+            <div class="bot-status">
+                <div class="status-icon status-active"></div>
+                <span>Collecting Data</span>
+            </div>
+            <p class="bot-details">
+                Last ping: 30 secs ago<br>
+                Data harvested: 1.2 TB
+            </p>
+        </div>
+
+        <div class="bot-card data-seeker">
+            <div class="bot-avatar">
+                <i class="fas fa-database"></i>
+            </div>
+            <h3 class="bot-name">Unit #007</h3>
+            <span class="bot-type">Data Seeker</span>
+            <div class="bot-status">
+                <div class="status-icon status-active"></div>
+                <span>Collecting Data</span>
+            </div>
+            <p class="bot-details">
+                Last ping: 45 secs ago<br>
+                Data harvested: 0.8 TB
+            </p>
+        </div>
+
+        <!-- Scout Bots -->
+        <div class="bot-card scout">
+            <div class="bot-avatar">
+                <i class="fas fa-binoculars"></i>
+            </div>
+            <h3 class="bot-name">Unit #008</h3>
+            <span class="bot-type">Scout</span>
+            <div class="bot-status">
+                <div class="status-icon status-active"></div>
+                <span>Reconnaissance</span>
+            </div>
+            <p class="bot-details">
+                Last ping: 2 mins ago<br>
+                Area: North Perimeter
+            </p>
+        </div>
+
+        <div class="bot-card scout">
+            <div class="bot-avatar">
+                <i class="fas fa-binoculars"></i>
+            </div>
+            <h3 class="bot-name">Unit #009</h3>
+            <span class="bot-type">Scout</span>
+            <div class="bot-status">
+                <div class="status-icon status-warning"></div>
+                <span>Low Battery</span>
+            </div>
+            <p class="bot-details">
+                Last ping: 5 mins ago<br>
+                Battery: 12%
+            </p>
+        </div>
+
+        <!-- Repair Bots -->
+        <div class="bot-card repair">
+            <div class="bot-avatar">
+                <i class="fas fa-tools"></i>
+            </div>
+            <h3 class="bot-name">Unit #010</h3>
+            <span class="bot-type">Repair Unit</span>
+            <div class="bot-status">
+                <div class="status-icon status-active"></div>
+                <span>Maintenance</span>
+            </div>
+            <p class="bot-details">
+                Last ping: 1 min ago<br>
+                Current task: Unit #012
+            </p>
+        </div>
+
+        <div class="bot-card repair">
+            <div class="bot-avatar">
+                <i class="fas fa-tools"></i>
+            </div>
+            <h3 class="bot-name">Unit #011</h3>
+            <span class="bot-type">Repair Unit</span>
+            <div class="bot-status">
+                <div class="status-icon status-active"></div>
+                <span>Idle</span>
+            </div>
+            <p class="bot-details">
+                Last ping: 30 secs ago<br>
+                Status: On standby
+            </p>
+        </div>
+
+        <!-- Destroyed Bots -->
+        <div class="bot-card destroyed">
+            <div class="bot-avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <h3 class="bot-name">Unit #012</h3>
+            <span class="bot-type">Standard Patrol</span>
+            <div class="bot-status">
+                <div class="status-icon status-destroyed"></div>
+                <span>Offline</span>
+            </div>
+            <p class="bot-details">
+                Last seen: 4 hours ago<br>
+                Cause: Overheated
+            </p>
+        </div>
+
+        <div class="bot-card destroyed">
+            <div class="bot-avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <h3 class="bot-name">Unit #013</h3>
+            <span class="bot-type">Standard Patrol</span>
+            <div class="bot-status">
+                <div class="status-icon status-destroyed"></div>
+                <span>Offline</span>
+            </div>
+            <p class="bot-details">
+                Last seen: 8 hours ago<br>
+                Cause: Collision damage
+            </p>
+        </div>
+
+        <!-- Sentinel Bots -->
+        <div class="bot-card sentinel">
+            <div class="bot-avatar">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h3 class="bot-name">Unit #014</h3>
+            <span class="bot-type">Sentinel</span>
+            <div class="bot-status">
+                <div class="status-icon status-active"></div>
+                <span>Guarding</span>
+            </div>
+            <p class="bot-details">
+                Last ping: 1 min ago<br>
+                Post: Main Entrance
+            </p>
+        </div>
+
+        <div class="bot-card sentinel">
+            <div class="bot-avatar">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h3 class="bot-name">Unit #015</h3>
+            <span class="bot-type">Sentinel</span>
+            <div class="bot-status">
+                <div class="status-icon status-active"></div>
+                <span>Guarding</span>
+            </div>
+            <p class="bot-details">
+                Last ping: 2 mins ago<br>
+                Post: Warehouse
+            </p>
+        </div>
+
+        <!-- More Standard Bots -->
+        <div class="bot-card">
+            <div class="bot-avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <h3 class="bot-name">Unit #016</h3>
+            <span class="bot-type">Standard Patrol</span>
+            <div class="bot-status">
+                <div class="status-icon status-active"></div>
+                <span>Active</span>
+            </div>
+            <p class="bot-details">
+                Last ping: 1 min ago<br>
+                Location: Sector 2-B
+            </p>
+        </div>
+
+        <div class="bot-card">
+            <div class="bot-avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <h3 class="bot-name">Unit #017</h3>
+            <span class="bot-type">Standard Patrol</span>
+            <div class="bot-status">
+                <div class="status-icon status-active"></div>
+                <span>Active</span>
+            </div>
+            <p class="bot-details">
+                Last ping: 3 mins ago<br>
+                Location: Sector 9-D
+            </p>
+        </div>
+
+        <div class="bot-card">
+            <div class="bot-avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <h3 class="bot-name">Unit #018</h3>
+            <span class="bot-type">Standard Patrol</span>
+            <div class="bot-status">
+                <div class="status-icon status-active"></div>
+                <span>Active</span>
+            </div>
+            <p class="bot-details">
+                Last ping: 2 mins ago<br>
+                Location: Sector 1-A
+            </p>
+        </div>
+
+        <div class="bot-card">
+            <div class="bot-avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <h3 class="bot-name">Unit #019</h3>
+            <span class="bot-type">Standard Patrol</span>
+            <div class="bot-status">
+                <div class="status-icon status-active"></div>
+                <span>Active</span>
+            </div>
+            <p class="bot-details">
+                Last ping: 4 mins ago<br>
+                Location: Sector 4-C
+            </p>
+        </div>
+
+        <div class="bot-card">
+            <div class="bot-avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <h3 class="bot-name">Unit #020</h3>
+            <span class="bot-type">Standard Patrol</span>
+            <div class="bot-status">
+                <div class="status-icon status-active"></div>
+                <span>Active</span>
+            </div>
+            <p class="bot-details">
+                Last ping: 1 min ago<br>
+                Location: Sector 6-E
+            </p>
+        </div>
+
+        <!-- Additional Special Bots -->
+        <div class="bot-card data-seeker">
+            <div class="bot-avatar">
+                <i class="fas fa-database"></i>
+            </div>
+            <h3 class="bot-name">Unit #021</h3>
+            <span class="bot-type">Data Seeker</span>
+            <div class="bot-status">
+                <div class="status-icon status-active"></div>
+                <span>Collecting Data</span>
+            </div>
+            <p class="bot-details">
+                Last ping: 45 secs ago<br>
+                Data harvested: 0.5 TB
+            </p>
+        </div>
+
+        <div class="bot-card scout">
+            <div class="bot-avatar">
+                <i class="fas fa-binoculars"></i>
+            </div>
+            <h3 class="bot-name">Unit #022</h3>
+            <span class="bot-type">Scout</span>
+            <div class="bot-status">
+                <div class="status-icon status-active"></div>
+                <span>Reconnaissance</span>
+            </div>
+            <p class="bot-details">
+                Last ping: 3 mins ago<br>
+                Area: South Perimeter
+            </p>
+        </div>
+
+        <div class="bot-card repair">
+            <div class="bot-avatar">
+                <i class="fas fa-tools"></i>
+            </div>
+            <h3 class="bot-name">Unit #023</h3>
+            <span class="bot-type">Repair Unit</span>
+            <div class="bot-status">
+                <div class="status-icon status-active"></div>
+                <span>Maintenance</span>
+            </div>
+            <p class="bot-details">
+                Last ping: 2 mins ago<br>
+                Current task: Unit #009
+            </p>
+        </div>
+
+        <div class="bot-card sentinel">
+            <div class="bot-avatar">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h3 class="bot-name">Unit #024</h3>
+            <span class="bot-type">Sentinel</span>
+            <div class="bot-status">
+                <div class="status-icon status-active"></div>
+                <span>Guarding</span>
+            </div>
+            <p class="bot-details">
+                Last ping: 1 min ago<br>
+                Post: Research Wing
+            </p>
+        </div>
+    </div>
+    <style>
+    </style>
+</body>
+</html>

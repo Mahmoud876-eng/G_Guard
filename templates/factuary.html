@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Industrial Bot Transfer System</title>
+    <style>
+        /* Base Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, #1a3e72, #0a1f3d);
+            color: white;
+            padding: 1rem 0;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .header-title {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            padding: 0.5rem 1rem;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .nav-btn:hover {
+            background-color: #218838;
+        }
+
+        /* Main Container */
+        .container {
+            display: flex;
+            min-height: calc(100vh - 120px);
+        }
+
+        /* Facility Map */
+        .facility-map {
+            flex: 1;
+            background-color: #e9ecef;
+            padding: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .map-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            gap: 4px;
+            height: 100%;
+        }
+
+        .zone {
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .zone:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        }
+
+        .loading-dock {
+            background-color: #6c757d;
+            grid-column: span 3;
+            grid-row: span 2;
+        }
+
+        .production-line {
+            background-color: #007bff;
+            grid-column: span 6;
+            grid-row: span 3;
+        }
+
+        .warehouse {
+            background-color: #28a745;
+            grid-column: span 3;
+            grid-row: span 4;
+        }
+
+        .quality-control {
+            background-color: #17a2b8;
+            grid-column: span 3;
+            grid-row: span 2;
+        }
+
+        .research-lab {
+            background-color: #6f42c1;
+            grid-column: span 3;
+            grid-row: span 3;
+        }
+
+        .maintenance {
+            background-color: #fd7e14;
+            grid-column: span 3;
+            grid-row: span 2;
+        }
+
+        .bot {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-color: #dc3545;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: grab;
+            z-index: 10;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+
+        .bot:hover {
+            transform: scale(1.2);
+        }
+
+        .bot.selected {
+            border: 3px solid gold;
+            box-shadow: 0 0 10px gold;
+        }
+
+        .bot.active {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+        }
+
+        .path-line {
+            position: absolute;
+            height: 3px;
+            background-color: rgba(220, 53, 69, 0.5);
+            transform-origin: left center;
+            z-index: 5;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            width: 300px;
+            background-color: white;
+            padding: 1rem;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+            overflow-y: auto;
+        }
+
+        .bot-list {
+            margin-top: 1rem;
+        }
+
+        .bot-item {
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .bot-item:hover {
+            background-color: #e9ecef;
+        }
+
+        .bot-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .bot-icon {
+            width: 20px;
+            height: 20px;
+            background-color: #dc3545;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+            display: inline-block;
+        }
+
+        .bot-status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-left: 0.5rem;
+        }
+
+        .status-active {
+            background-color: #28a745;
+            animation: pulse 1.5s infinite;
+        }
+
+        .status-inactive {
+            background-color: #6c757d;
+        }
+
+        .transfer-controls {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        select, button {
+            width: 100%;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            border-radius: 4px;
+            border: 1px solid #ced4da;
+        }
+
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #343a40;
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            font-size: 0.8rem;
+        }
+
+        /* Active Tasks Panel */
+        .active-tasks {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #e2e3e5;
+            border-radius: 4px;
+        }
+
+        .task-item {
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            background-color: white;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    {% include '_navbar.html' %}
+    <header style="padding-top:40px; text-align:center;">
+        <h1 class="header-title">Industrial Bot Transfer System</h1>
+    </header>
+
+    <div class="container">
+        <!-- Facility Map -->
+        <div class="facility-map" id="facilityMap">
+            <div class="map-grid">
+                <div class="zone loading-dock">Loading Dock</div>
+                <div class="zone production-line">Production Line</div>
+                <div class="zone warehouse">Warehouse</div>
+                <div class="zone quality-control">Quality Control</div>
+                <div class="zone research-lab">Research Lab</div>
+                <div class="zone maintenance">Maintenance</div>
+                
+                <!-- Bots will be added here dynamically -->
+            </div>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <h2>Bot Control</h2>
+            
+            <div class="transfer-controls">
+                <h3>Transfer Bots</h3>
+                <select id="sourceZone">
+                    <option value="">Select Source Zone</option>
+                    <option value="loading-dock">Loading Dock</option>
+                    <option value="production-line">Production Line</option>
+                    <option value="warehouse">Warehouse</option>
+                    <option value="quality-control">Quality Control</option>
+                    <option value="research-lab">Research Lab</option>
+                    <option value="maintenance">Maintenance</option>
+                </select>
+                
+                <select id="destinationZone">
+                    <option value="">Select Destination Zone</option>
+                    <option value="loading-dock">Loading Dock</option>
+                    <option value="production-line">Production Line</option>
+                    <option value="warehouse">Warehouse</option>
+                    <option value="quality-control">Quality Control</option>
+                    <option value="research-lab">Research Lab</option>
+                    <option value="maintenance">Maintenance</option>
+                </select>
+                
+                <select id="botSelection">
+                    <option value="">Select Bot to Transfer</option>
+                    <!-- Will be populated dynamically -->
+                </select>
+                
+                <button id="transferButton" disabled>Execute Transfer</button>
+            </div>
+            
+            <div class="bot-list">
+                <h3>Active Bots (8/10)</h3>
+                <div id="botList">
+                    <!-- Will be populated dynamically -->
+                </div>
+            </div>
+
+            <div class="active-tasks">
+                <h3>Active Tasks</h3>
+                <div class="task-item">
+                    <strong>Bot-002</strong>: Assembling components in Production Line
+                </div>
+                <div class="task-item">
+                    <strong>Bot-005</strong>: Conducting experiments in Research Lab
+                </div>
+                <div class="task-item">
+                    <strong>Bot-007</strong>: Transporting materials to Warehouse
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Industrial Automation System | © 2024 All Rights Reserved</p>
+    </footer>
+
+    <script>
+        // Facility zones data
+        const zones = {
+            'loading-dock': { x: 0, y: 0, width: 3, height: 2 },
+            'production-line': { x: 3, y: 0, width: 6, height: 3 },
+            'warehouse': { x: 9, y: 0, width: 3, height: 4 },
+            'quality-control': { x: 0, y: 2, width: 3, height: 2 },
+            'research-lab': { x: 0, y: 4, width: 3, height: 3 },
+            'maintenance': { x: 0, y: 7, width: 3, height: 2 }
+        };
+
+        // Bot data with activity status
+        const bots = [
+            { id: 1, name: 'Bot-001', zone: 'loading-dock', x: 0.5, y: 0.5, active: true, task: "Unloading materials" },
+            { id: 2, name: 'Bot-002', zone: 'production-line', x: 4, y: 1, active: true, task: "Assembling components" },
+            { id: 3, name: 'Bot-003', zone: 'warehouse', x: 10, y: 1, active: false, task: "Standby" },
+            { id: 4, name: 'Bot-004', zone: 'quality-control', x: 1, y: 3, active: true, task: "Inspecting products" },
+            { id: 5, name: 'Bot-005', zone: 'research-lab', x: 1, y: 5, active: true, task: "Conducting experiments" },
+            { id: 6, name: 'Bot-006', zone: 'maintenance', x: 1, y: 8, active: false, task: "Charging" },
+            { id: 7, name: 'Bot-007', zone: 'production-line', x: 6, y: 2, active: true, task: "Transporting materials" },
+            { id: 8, name: 'Bot-008', zone: 'warehouse', x: 11, y: 2, active: true, task: "Inventory management" },
+            { id: 9, name: 'Bot-009', zone: 'maintenance', x: 2, y: 8, active: false, task: "Repairing" },
+            { id: 10, name: 'Bot-010', zone: 'loading-dock', x: 2, y: 0.5, active: true, task: "Loading materials" }
+        ];
+
+        // Selected bot
+        let selectedBot = null;
+        let selectedBotElement = null;
+
+        // Initialize the facility map
+        function initializeMap() {
+            const map = document.getElementById('facilityMap');
+            const mapGrid = map.querySelector('.map-grid');
+            
+            // Calculate cell size based on viewport
+            const cellWidth = mapGrid.clientWidth / 12;
+            const cellHeight = mapGrid.clientHeight / 8;
+            
+            // Create and position bots
+            bots.forEach(bot => {
+                const botElement = document.createElement('div');
+                botElement.className = `bot ${bot.active ? 'active' : ''}`;
+                botElement.id = `bot-${bot.id}`;
+                botElement.textContent = bot.id;
+                botElement.dataset.botId = bot.id;
+                
+                // Position bot in its zone
+                const zone = zones[bot.zone];
+                const left = (zone.x + bot.x) * cellWidth;
+                const top = (zone.y + bot.y) * cellHeight;
+                
+                botElement.style.left = `${left}px`;
+                botElement.style.top = `${top}px`;
+                
+                // Add click event
+                botElement.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    selectBot(bot.id, botElement);
+                });
+                
+                mapGrid.appendChild(botElement);
+            });
+            
+            // Add click event to map to deselect bots
+            mapGrid.addEventListener('click', function() {
+                if (selectedBotElement) {
+                    selectedBotElement.classList.remove('selected');
+                    selectedBot = null;
+                    selectedBotElement = null;
+                    updateTransferControls();
+                }
+            });
+            
+            // Initialize bot list
+            updateBotList();
+        }
+
+        // Select a bot
+        function selectBot(botId, element) {
+            if (selectedBotElement) {
+                selectedBotElement.classList.remove('selected');
+            }
+            
+            selectedBot = bots.find(bot => bot.id == botId);
+            selectedBotElement = element || document.getElementById(`bot-${botId}`);
+            selectedBotElement.classList.add('selected');
+            
+            updateTransferControls();
+        }
+
+        // Update the transfer controls based on selection
+        function updateTransferControls() {
+            const sourceSelect = document.getElementById('sourceZone');
+            const destinationSelect = document.getElementById('destinationZone');
+            const botSelect = document.getElementById('botSelection');
+            const transferButton = document.getElementById('transferButton');
+            
+            // Clear and populate bot selection
+            botSelect.innerHTML = '<option value="">Select Bot to Transfer</option>';
+            
+            if (selectedBot) {
+                sourceSelect.value = selectedBot.zone;
+                sourceSelect.disabled = true;
+                
+                // Populate destination zones (excluding current zone)
+                destinationSelect.innerHTML = '<option value="">Select Destination Zone</option>';
+                Object.keys(zones).forEach(zone => {
+                    if (zone !== selectedBot.zone) {
+                        const zoneName = zone.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                        destinationSelect.innerHTML += `<option value="${zone}">${zoneName}</option>`;
+                    }
+                });
+                
+                // Add selected bot to bot selection
+                botSelect.innerHTML += `<option value="${selectedBot.id}" selected>${selectedBot.name}</option>`;
+                
+                transferButton.disabled = !destinationSelect.value;
+            } else {
+                sourceSelect.value = '';
+                sourceSelect.disabled = false;
+                destinationSelect.innerHTML = '<option value="">Select Destination Zone</option>';
+                transferButton.disabled = true;
+            }
+            
+            // Add event listeners
+            destinationSelect.addEventListener('change', function() {
+                transferButton.disabled = !this.value;
+            });
+            
+            transferButton.addEventListener('click', transferBot);
+        }
+
+        // Transfer bot to new zone
+        function transferBot() {
+            const botId = document.getElementById('botSelection').value;
+            const destinationZone = document.getElementById('destinationZone').value;
+            
+            if (!botId || !destinationZone) return;
+            
+            const bot = bots.find(b => b.id == botId);
+            if (!bot) return;
+            
+            // Update bot's zone and position (center of new zone)
+            bot.zone = destinationZone;
+            bot.x = zones[destinationZone].width / 2;
+            bot.y = zones[destinationZone].height / 2;
+            
+            // Move bot visually
+            const mapGrid = document.querySelector('.map-grid');
+            const cellWidth = mapGrid.clientWidth / 12;
+            const cellHeight = mapGrid.clientHeight / 8;
+            const zone = zones[destinationZone];
+            
+            const botElement = document.getElementById(`bot-${botId}`);
+            botElement.style.left = `${(zone.x + bot.x) * cellWidth}px`;
+            botElement.style.top = `${(zone.y + bot.y) * cellHeight}px`;
+            
+            // Deselect bot
+            botElement.classList.remove('selected');
+            selectedBot = null;
+            selectedBotElement = null;
+            
+            // Reset controls
+            document.getElementById('sourceZone').value = '';
+            document.getElementById('destinationZone').value = '';
+            document.getElementById('botSelection').value = '';
+            document.getElementById('transferButton').disabled = true;
+            
+            // Update bot list
+            updateBotList();
+            
+            // Show transfer animation
+            animateTransfer(botId, zone);
+        }
+
+        // Animate bot transfer
+        function animateTransfer(botId, destinationZone) {
+            const botElement = document.getElementById(`bot-${botId}`);
+            botElement.style.transition = 'all 1s ease-in-out';
+            botElement.style.transform = 'scale(1.3)';
+            
+            setTimeout(() => {
+                botElement.style.transform = 'scale(1)';
+                botElement.style.transition = '';
+            }, 1000);
+        }
+
+        // Update the bot list
+        function updateBotList() {
+            const botList = document.getElementById('botList');
+            botList.innerHTML = '';
+            
+            bots.forEach(bot => {
+                const botItem = document.createElement('div');
+                botItem.className = 'bot-item';
+                botItem.innerHTML = `
+                    <div class="bot-info">
+                        <span class="bot-icon"></span>
+                        ${bot.name} (${bot.zone.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')})
+                        <span class="bot-status-indicator ${bot.active ? 'status-active' : 'status-inactive'}"></span>
+                    </div>
+                    <small>${bot.task}</small>
+                `;
+                
+                botItem.addEventListener('click', function() {
+                    selectBot(bot.id, document.getElementById(`bot-${bot.id}`));
+                });
+                
+                botList.appendChild(botItem);
+            });
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initializeMap);
+    </script>
+
+</body>
+</html> 

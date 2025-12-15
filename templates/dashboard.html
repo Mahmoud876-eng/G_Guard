@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwarmSense - Dashboard</title>
+    <style>
+        /* Base styles */
+        :root {
+            --primary: #2a6e3f;
+            --primary-light: #4caf50;
+            --secondary: #1a365d;
+            --accent: #ff9800;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --info: #17a2b8;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7f9;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header */
+        header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 100%;
+            z-index: 1000;
+        }
+        
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo h2 {
+            margin-bottom: 0;
+            color: var(--primary);
+        }
+        
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav ul li {
+            margin-left: 30px;
+        }
+        
+        nav ul li a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        nav ul li a:hover {
+            color: var(--primary);
+        }
+        
+        .user-menu {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        
+        /* Dashboard Layout */
+        .dashboard-container {
+            padding-top: 100px;
+            padding-bottom: 40px;
+        }
+        
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .dashboard-title h1 {
+            color: var(--secondary);
+            margin-bottom: 5px;
+        }
+        
+        .dashboard-title p {
+            color: var(--gray);
+        }
+        
+        .dashboard-actions {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .btn:hover {
+            background-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 20px;
+            font-size: 24px;
+        }
+        
+        .humidity .stat-icon {
+            background-color: rgba(42, 110, 63, 0.1);
+            color: var(--primary);
+        }
+        
+        .fire .stat-icon {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: var(--danger);
+        }
+        
+        .co2 .stat-icon {
+            background-color: rgba(23, 162, 184, 0.1);
+            color: var(--info);
+        }
+        
+        .pm25 .stat-icon {
+            background-color: rgba(108, 117, 125, 0.1);
+            color: var(--gray);
+        }
+        
+        .stat-info h3 {
+            font-size: 14px;
+            color: var(--gray);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .stat-trend {
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .trend-up {
+            color: var(--danger);
+        }
+        
+        .trend-down {
+            color: var(--primary);
+        }
+        
+        .trend-neutral {
+            color: var(--gray);
+        }
+        
+        /* Alert Section */
+        .alert-section {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--secondary);
+        }
+        
+        .alert-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+        }
+        
+        .alert-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+        
+        .alert-high {
+            border-left-color: var(--danger);
+            background-color: rgba(220, 53, 69, 0.05);
+        }
+        
+        .alert-medium {
+            border-left-color: var(--warning);
+            background-color: rgba(255, 193, 7, 0.05);
+        }
+        
+        .alert-low {
+            border-left-color: var(--info);
+            background-color: rgba(23, 162, 184, 0.05);
+        }
+        
+        .alert-icon {
+            margin-right: 15px;
+            font-size: 20px;
+        }
+        
+        .alert-content h4 {
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+        
+        .alert-content p {
+            font-size: 14px;
+            color: var(--gray);
+        }
+        
+        /* Charts Section */
+        .charts-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .chart-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .chart-container {
+            height: 300px;
+            margin-top: 20px;
+        }
+        
+        /* Nodes Section */
+        .nodes-section {
+            background-color: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+        
+        .nodes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .node-card {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .node-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        
+        .node-status {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+        }
+        
+        .status-online {
+            background-color: var(--primary);
+        }
+        
+        .status-offline {
+            background-color: var(--gray);
+        }
+        
+        .status-warning {
+            background-color: var(--warning);
+        }
+        
+        .node-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .node-location {
+            font-size: 14px;
+            color: var(--gray);
+            margin-bottom: 10px;
+        }
+        
+        .node-data {
+            font-size: 12px;
+            color: var(--dark);
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--secondary);
+            color: white;
+            padding: 40px 0 20px;
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+        
+        .footer-column {
+            flex: 0 0 23%;
+            margin-bottom: 20px;
+        }
+        
+        .footer-column h3 {
+            color: white;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+        
+        .footer-column ul {
+            list-style: none;
+        }
+        
+        .footer-column ul li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-column ul li a {
+            color: #a0aec0;
+            text-decoration: none;
+            transition: color 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .footer-column ul li a:hover {
+            color: white;
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: #a0aec0;
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer-column {
+                flex: 0 0 48%;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .dashboard-actions {
+                margin-top: 15px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            nav ul {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer-column {
+                flex: 0 0 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    {% include '_navbar.html' %}
+
+    <!-- Dashboard Content -->
+    <div class="container dashboard-container" style="padding-top:40px;">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <div class="dashboard-title">
+                <h1>Environmental Monitoring Dashboard</h1>
+                <p>Real-time data from your SwarmSense network</p>
+            </div>
+            <div class="dashboard-actions">
+                <!-- Chatbot side nav buttons removed -->
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <!-- Fire Detection Card -->
+            <div class="stat-card fire">
+                <div class="stat-icon">🔥</div>
+                <div class="stat-info">
+                    <h3>Fire Detection</h3>
+                    <div class="stat-value" id="fire-val">Normal</div>
+                </div>
+            </div>
+
+            <!-- Humidity Card -->
+            <div class="stat-card co2">
+                <div class="stat-icon">💧</div>
+                <div class="stat-info">
+                    <h3>Humidity</h3>
+                    <div class="stat-value" id="flame-val">0</div>
+                </div>
+            </div>
+
+            <!-- Gas Sensor Card -->
+            <div class="stat-card pm25">
+                <div class="stat-icon">💨</div>
+                <div class="stat-info">
+                    <h3>Gas Level</h3>
+                    <div class="stat-value" id="gas-val">0</div>
+                </div>
+            </div>
+
+            <!-- MQ Digital Card -->
+            <div class="stat-card humidity">
+                <div class="stat-icon">📊</div>
+                <div class="stat-info">
+                    <h3>MQ Digital</h3>
+                    <div class="stat-value" id="mq-val">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>SwarmSense</h3>
+                    <p>Collective intelligence for environmental protection, inspired by nature's most efficient systems.</p>
+                </div>
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="dashboard.html">Dashboard</a></li>
+                        <li><a href="nodes.html">Nodes</a></li>
+                        <li><a href="alerts.html">Alerts</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Resources</h3>
+                    <ul>
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">API Reference</a></li>
+                        <li><a href="#">Case Studies</a></li>
+                        <li><a href="#">Support</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Contact Us</h3>
+                    <ul>
+                        <li><a href="mailto:info@swarmsense.com">info@swarmsense.com</a></li>
+                        <li><a href="tel:+1234567890">+1 (234) 567-890</a></li>
+                        <li>123 Innovation Drive<br>Tech City, TC 12345</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 SwarmSense. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Live update from same-origin API every 200ms with fire and gas alert notifications
+        const intervalMs = 200;
+        let lastFireStatus = 'Normal';
+        let lastGasStatus = 'Normal';
+        
+        function showNotification(message, bgColor = '#dc3545') {
+            // Create notification element
+            const notif = document.createElement('div');
+            notif.textContent = message;
+            Object.assign(notif.style, {
+                position: 'fixed',
+                top: '80px',
+                right: '20px',
+                background: bgColor,
+                color: 'white',
+                padding: '20px 30px',
+                borderRadius: '10px',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+                fontSize: '18px',
+                fontWeight: 'bold',
+                zIndex: '10000',
+                animation: 'slideIn 0.3s ease'
+            });
+            document.body.appendChild(notif);
+            
+            // Play alert sound
+            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuJzvLNfywGH2q+7uGhTw0PUKXh7r1dGwiA0O/yul0bB0S+7vC+Wx4FQsrw8dxxHAdO0PHTX2EKHHfL8t5kHBBoyvHlcx8Gbczw8etZIQRh0PLjZB4FaMrx8+NWJwRe0fLfZR8GYtDz4WMgBWbS7/XiWyYEW9Lx4Wkh'); 
+            audio.volume = 0.5;
+            audio.play().catch(() => {});
+            
+            // Remove after 5 seconds
+            setTimeout(() => notif.remove(), 5000);
+        }
+        
+        async function tick() {
+            try {
+                const res = await fetch('/api/data?cb=' + Date.now(), { cache: 'no-store' });
+                const json = await res.json();
+                if (json && json.success) {
+                    const d = json.data || {};
+                    const fireStatus = d.fire_status || 'Normal';
+                    const gasStatus = d.gas_status || 'Normal';
+                    
+                    // Check if fire status changed to ALERT
+                    if (fireStatus === 'ALERT' && lastFireStatus !== 'ALERT') {
+                        showNotification('🔥 FIRE ALERT! Flame detected!', '#dc3545');
+                    }
+                    lastFireStatus = fireStatus;
+                    
+                    // Check if gas status changed to WARNING
+                    if (gasStatus === 'WARNING' && lastGasStatus !== 'WARNING') {
+                        showNotification('💨 GAS ALERT! High gas level detected!', '#ff9800');
+                    }
+                    lastGasStatus = gasStatus;
+                    
+                    // Update values with new Firebase variables
+                    document.getElementById('fire-val').textContent = fireStatus;
+                    document.getElementById('gas-val').textContent = d.gas_analog ?? 0;
+                    document.getElementById('flame-val').textContent = d.flame_analog ?? 0;
+                    document.getElementById('mq-val').textContent = d.mq_digital_raw ?? 0;
+                }
+            } catch (e) {
+                // silent for hackathon reliability
+            } finally {
+                setTimeout(tick, intervalMs);
+            }
+        }
+        tick();
+    </script>
+</body>
+</html>

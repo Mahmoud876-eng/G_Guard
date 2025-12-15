@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SwarmSense • Live Metrics</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; padding: 32px; background: #0b1220; color: #e2e8f0; }
+    .card { max-width: 720px; margin: 0 auto; background: #0f172a; border: 1px solid #1f2937; border-radius: 12px; padding: 24px; }
+    h1 { margin: 0 0 12px; font-size: 22px; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
+    .metric { background: #111827; border: 1px solid #1f2937; border-radius: 10px; padding: 16px; text-align: center; }
+    .label { color: #9ca3af; font-size: 12px; }
+    .value { font-size: 26px; font-weight: 600; margin-top: 6px; }
+    pre { background: #0b1220; border: 1px solid #1f2937; border-radius: 10px; padding: 12px; overflow: auto; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Live Metrics (server-rendered)</h1>
+    <div class="grid">
+      <div class="metric">
+        <div class="label">CO2</div>
+        <div class="value" id="co2-val">{{ co2_value }}</div>
+      </div>
+      <div class="metric">
+        <div class="label">Humidity</div>
+        <div class="value" id="hum-val">{{ humidity_value }}</div>
+      </div>
+      <div class="metric">
+        <div class="label">Temperature</div>
+        <div class="value" id="temp-val">{{ temperature_value }}</div>
+      </div>
+    </div>
+    <h2 style="margin-top:16px;font-size:16px;color:#9ca3af;">Raw payload</h2>
+    <pre id="raw-json">{{ latest_json | tojson(indent=2) }}</pre>
+  </div>
+
+  <script>
+    // Simple, reliable polling every 200ms against same-origin API
+    const intervalMs = 200;
+    async function tick() {
+      try {
+        const res = await fetch('/api/data?cb=' + Date.now(), { cache: 'no-store' });
+        const json = await res.json();
+        if (json && json.success) {
+          const d = json.data || {};
+          document.getElementById('co2-val').textContent = d.CO2 ?? 0;
+          document.getElementById('hum-val').textContent = d.humidity ?? 0;
+          document.getElementById('temp-val').textContent = d.temperature ?? 0;
+          document.getElementById('raw-json').textContent = JSON.stringify(d, null, 2);
+        }
+      } catch (e) {
+        // keep silent for hackathon reliability
+      } finally {
+        setTimeout(tick, intervalMs);
+      }
+    }
+    tick();
+  </script>
+</body>
+</html>
